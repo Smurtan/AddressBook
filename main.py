@@ -38,9 +38,14 @@ class AddressBook:
         if phone_number[0] == '8':  # we are replacing the country code for Russia
             phone_number = '+7' + phone_number[1:]
 
-        self.address_book[name] = dict(phone_number=phone_number,  # Adding a contact to the Address Book dictionary
-                                       last_name=last_name if last_name != '' else 'No data available',
-                                       email=email if email != '' else 'No data available')
+        contact_details = dict(phone_number=phone_number,  # we collect the data of a new contact in one dictionary
+                               last_name=last_name if last_name != '' else 'No data available',
+                               email=email if email != '' else 'No data available')
+
+        try:
+            self.address_book[name[0].upper()][name] = contact_details
+        except KeyError:
+            self.address_book[name[0].upper()] = {name:contact_details}
 
         with open('addressbook', 'wb') as f:  # Saving a new contact
             pickle.dump(self.address_book, f)

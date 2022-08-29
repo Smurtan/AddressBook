@@ -45,12 +45,24 @@ class AddressBook:
         try:
             self.address_book[name[0].upper()][name] = contact_details
         except KeyError:
-            self.address_book[name[0].upper()] = {name:contact_details}
+            self.address_book[name[0].upper()] = {name: contact_details}
 
         with open('addressbook', 'wb') as f:  # Saving a new contact
             pickle.dump(self.address_book, f)
 
         print('Contact successfully added.')
+
+    def __str__(self):
+        no_data = ''  # output if there is no data
+        keys = sorted(self.address_book)  # sort the first letters alphabetically
+        print('==' * 70)  # separated
+        for key in keys:
+            print(' ' * 2 + key)  # output the first letters
+            for name, details in self.address_book[key].items():  # going through the dictionary of each letter
+                print(f'{name} {details["last_name"] if details["last_name"] != "No data available" else no_data} '
+                      f'(phone: {details["phone_number"]}, '
+                      f'email: {details["email"] if details["last_name"] != "No data available" else no_data})')
+        return '==' * 70  # separated
 
 
 if __name__ == '__main__':
@@ -65,3 +77,6 @@ if __name__ == '__main__':
 
         elif line[0] == 'e':
             break
+
+        elif line[0] == 'w':
+            print(user)

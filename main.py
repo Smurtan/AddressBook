@@ -5,7 +5,7 @@ class AddressBook:
     def __init__(self):
         with open('addressbook', 'rb') as f:  # loading saved contacts
             self.address_book = pickle.load(f)
-            print(self.address_book)
+            self.address_book.clear()
 
     def add(self):
 
@@ -39,13 +39,12 @@ class AddressBook:
             phone_number = '+7' + phone_number[1:]
 
         contact_details = dict(phone_number=phone_number,  # we collect the data of a new contact in one dictionary
-                               last_name=last_name if last_name != '' else 'No data available',
                                email=email if email != '' else 'No data available')
 
         try:
-            self.address_book[name[0].upper()][name] = contact_details
+            self.address_book[name[0].upper()][name + ' ' + last_name] = contact_details
         except KeyError:
-            self.address_book[name[0].upper()] = {name: contact_details}
+            self.address_book[name[0].upper()] = {name + ' ' + last_name: contact_details}
 
         with open('addressbook', 'wb') as f:  # Saving a new contact
             pickle.dump(self.address_book, f)
@@ -53,15 +52,14 @@ class AddressBook:
         print('Contact successfully added.')
 
     def __str__(self):
-        no_data = ''  # output if there is no data
         keys = sorted(self.address_book)  # sort the first letters alphabetically
         print('==' * 70)  # separated
         for key in keys:
             print(' ' * 2 + key)  # output the first letters
             for name, details in self.address_book[key].items():  # going through the dictionary of each letter
-                print(f'{name} {details["last_name"] if details["last_name"] != "No data available" else no_data} '
-                      f'(phone: {details["phone_number"]}, '
-                      f'email: {details["email"] if details["last_name"] != "No data available" else no_data})')
+                # output only available data
+                print(f'{name} (phone: {details["phone_number"]}', end='')
+                print(', email: ' + details["email"] + ")" if details["email"] != "No data available" else ')')
         return '==' * 70  # separated
 
 

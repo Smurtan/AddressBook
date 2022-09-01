@@ -5,7 +5,6 @@ class AddressBook:
     def __init__(self):
         with open('addressbook', 'rb') as f:  # loading saved contacts
             self.address_book = pickle.load(f)
-            self.address_book.clear()
 
     def add(self):
 
@@ -22,7 +21,7 @@ class AddressBook:
         while len(name) == 0:  # Be sure to enter the name
             name = input('You didn\'t enter a name, try again --> ')
 
-        while len(number) == 0:  # Be sure to enter the phone number
+        while 0 <= len(number) < 11:  # Be sure to enter the phone number
             number = input('You haven\'t entered phone number, try again --> ')
 
         for symbol in number:  # we extract only digits from the entered number,
@@ -37,6 +36,8 @@ class AddressBook:
 
         if phone_number[0] == '8':  # we are replacing the country code for Russia
             phone_number = '+7' + phone_number[1:]
+        elif phone_number[0] == '7':  # we are replacing the country code for Russia
+            phone_number = '+' + phone_number[:]
 
         contact_details = dict(phone_number=phone_number,  # we collect the data of a new contact in one dictionary
                                email=email if email != '' else 'No data available')
@@ -52,15 +53,25 @@ class AddressBook:
         print('Contact successfully added.')
 
     def __str__(self):
+
+        """Displays the entire contact list in order"""
+
         keys = sorted(self.address_book)  # sort the first letters alphabetically
         print('==' * 70)  # separated
         for key in keys:
             print(' ' * 2 + key)  # output the first letters
-            for name, details in self.address_book[key].items():  # going through the dictionary of each letter
+            number = 1
+            for name, details in sorted(self.address_book[key].items()):  # going through the dictionary of each letter
                 # output only available data
+                print('%i)' % number, end=' ')
                 print(f'{name} (phone: {details["phone_number"]}', end='')
                 print(', email: ' + details["email"] + ")" if details["email"] != "No data available" else ')')
+                number += 1
         return '==' * 70  # separated
+
+    def __del__(self, number):
+        possible_contacts = self.address_book[number[0].upper()]  # all contacts starting with the letter you entered
+
 
 
 if __name__ == '__main__':

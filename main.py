@@ -13,7 +13,8 @@ class AddressBook:
         with open(name_file, 'wb') as file:
             pickle.dump(self.address_book, file)
 
-    def phone_number_conversion(self, number):
+    @staticmethod
+    def phone_number_conversion(number):
 
         """The function converts the phone number into a more readable one"""
 
@@ -26,8 +27,21 @@ class AddressBook:
             except ValueError:
                 continue
 
-        phone_number = f'{phone_number[0]} {phone_number[1:4]} {phone_number[4:7]}-{phone_number[7:9]}-{phone_number[9:]}'
+        if number[:2] != 's-':  # called only if a contact is added
+            while 0 <= len(number) < 11:  # Be sure to enter the phone number
+                number = input('You haven\'t entered phone number, try again --> ')
+
         # add separators to the phone number for easy reading (12345678901 --> 1 234 567-89-01)
+        phone_number = f'{phone_number[0]} {phone_number[1:4]} {phone_number[4:7]}-{phone_number[7:9]}-{phone_number[9:]}'
+        if number[:2] == 's-':
+            counter = -1  # used to go through the number in reverse order in the case of a search
+            while True:
+                if phone_number[counter].isdigit():  # truncating the number when searching to the first digit
+                    counter -= 1
+                    break
+                counter -= 1
+            phone_number = phone_number[:counter + 1]
+
         if phone_number[0] == '8':  # we are replacing the country code for Russia
             phone_number = '+7' + phone_number[1:]
         elif number[0] == '7':  # we are replacing the country code for Russia
@@ -46,9 +60,6 @@ class AddressBook:
 
         while len(name) == 0:  # Be sure to enter the name
             name = input('You didn\'t enter a name, try again --> ')
-
-        while 0 <= len(number) < 11:  # Be sure to enter the phone number
-            number = input('You haven\'t entered phone number, try again --> ')
 
         phone_number = self.phone_number_conversion(number)  # adding separators to a phone number
 
@@ -98,17 +109,18 @@ class AddressBook:
         """The function searches for a contact by name or by phone number"""
 
         contacts = []
-        try:  # search by phone number
-            int(information[3])
-            phone_number = self.phone_number_conversion(information)  # replacing the country code for Russia
+        # search by phone number
+        if information[2].isdigit() or information[3].isdigit():
+            # the type of the number changes to loaded in the dictionary
+            phone_number = self.phone_number_conversion(information)
             keys = sorted(self.address_book)  # sort the first letters alphabetically
             for key in keys:
                 for name, details in sorted(self.address_book[key].items()):  # we go through all the dictionary values
                     if details['phone_number'].startswith(phone_number):
                         contacts.append(name)
-
-        except ValueError:  # search by name
+        else:  # search by name
             # we find all matching contacts
+            information = information[2:]
             for key in self.address_book[information[0].upper()].keys():
                 if key.startswith(information):
                     contacts.append(key)
@@ -166,4 +178,4 @@ if __name__ == '__main__':
             user.remove(line[1:])
 
         elif line[0:2] == 's-':
-            user.search(line[2:])
+            user.search(line)

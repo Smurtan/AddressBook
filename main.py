@@ -1,14 +1,20 @@
 import pickle  # we use this library to work with address book files
+import datetime  # getting the current time for greeting
 
 
 class AddressBook:
+
+    """The class combines all the functions of the address book, presented in the form of functions"""
+
     def __init__(self):
         with open('addressbook', 'rb') as file:  # loading saved contacts
             self.address_book = pickle.load(file)
+        self.separator = '==' * 70
+        self.separator_ = '--' * 70
 
     def saving(self, name_file):
 
-        """The function is used to save changes"""
+        """The function overwrites the file and saves all changes"""
 
         with open(name_file, 'wb') as file:
             pickle.dump(self.address_book, file)
@@ -16,7 +22,7 @@ class AddressBook:
     @staticmethod
     def phone_number_conversion(number):
 
-        """The function converts the phone number into a more readable one"""
+        """The function converts the phone number into a more readable one (XXXXXXXXXXX --> X XXX XXX-XX-XX)"""
 
         phone_number = ''  # for later saving a phone number consisting only of digits
 
@@ -27,7 +33,7 @@ class AddressBook:
             except ValueError:
                 continue
 
-        if number[:2] != 's-':  # called only if a contact is added
+        if number[:2] != 's-' and number[:2] != 'S-':  # called only if a contact is added
             while 0 <= len(number) < 11:  # Be sure to enter the phone number
                 number = input('You haven\'t entered phone number, try again --> ')
 
@@ -52,6 +58,7 @@ class AddressBook:
 
         """The function adds new contacts to the address book, saving them in a convenient form for further use"""
 
+        print(self.separator)  # separate
         print('Adding a new contact:')
         name = input('Name --> ')
         last_name = input('Last name (if there is a name) --> ')
@@ -73,7 +80,9 @@ class AddressBook:
 
         self.saving('addressbook')  # Saving a new contact
 
+        print(self.separator_)  # separate
         print('Contact successfully added.')
+        print(self.separator)  # separate
 
     def remove(self, information):
 
@@ -88,7 +97,7 @@ class AddressBook:
                 if contact_number == number:  # matching numbers
                     self.address_book[information[0].upper()].pop(name)
                     self.saving('addressbook')  # Saving changes
-                    print('Contact successfully deleted')
+                    print('\nContact successfully deleted')
                     break
                 number += 1
 
@@ -106,11 +115,11 @@ class AddressBook:
 
     def search(self, information):
 
-        """The function searches for a contact by name or by phone number"""
+        """The function searches for a contact by name or phone number and displays all the contacts found"""
 
         contacts = []
         # search by phone number
-        if information[2].isdigit() or information[3].isdigit():
+        if information[2].isdigit() or information[2] == '+':
             # the type of the number changes to loaded in the dictionary
             phone_number = self.phone_number_conversion(information)
             keys = sorted(self.address_book)  # sort the first letters alphabetically
@@ -127,25 +136,29 @@ class AddressBook:
 
         # output the number of found contacts
         if len(contacts) == 0:
+            print(self.separator_)  # separated
             print('The search yielded no results')
+            print(self.separator_)  # separated
             return
-        print(f'{len(contacts)} of contacts were found' if len(contacts) > 1 else
-              f'{len(contacts)} contact was found')
+        print(f'\n{len(contacts)} of contacts were found' if len(contacts) > 1 else
+              f'\n{len(contacts)} contact was found')
         number = 1  # counters
         # output all found contacts
+        print(self.separator)  # separated
         for name in contacts:
             details = self.address_book[name[0].upper()][name]  # contact details
             print(f'{number})', end=' ')
             print(f'{name} (phone: {details["phone_number"]}', end='')
             print(', email: ' + details["email"] + ")" if details["email"] != "No data available" else ')')
             number += 1
+        print(self.separator)  # separated
 
     def __str__(self):
 
         """Displays the entire contact list in order"""
 
         keys = sorted(self.address_book)  # sort the first letters alphabetically
-        print('==' * 70)  # separated
+        print(self.separator)  # separate
         for key in keys:
             print(' ' * 2 + key)  # output the first letters
             number = 1  # counter
@@ -155,27 +168,53 @@ class AddressBook:
                 print(f'{name} (phone: {details["phone_number"]}', end='')
                 print(', email: ' + details["email"] + ")" if details["email"] != "No data available" else ')')
                 number += 1
-        return '==' * 70  # separated
+        return '==' * 70  # separate
 
 
 if __name__ == '__main__':
     user = AddressBook()
 
+    now = datetime.datetime.now().hour  # time at the moment
+    # the output of the greeting depends on the time of day
+    if 5 <= now < 12:
+        print('Good morning!')
+    elif 12 <= now < 17:
+        print('Good afternoon')
+    elif 17 <= now < 22:
+        print('Good evening')
+    elif 22 <= now < 5:
+        print('Good night')
+
+    # instructions for using the program
+    print(
+        'Instruction manual:\n'
+        '\t- To add a contact, enter "+" and fill in the appropriate fields.\n'
+        '\t- To view the entire contact list, enter "w" (watch)\n'
+        '\t- To find the contact you need, enter "s-[contact name/phone number]" (search-...)\n'
+        '\t- To delete a contact, enter "-[Contact name/first letter of the name and serial number]"\n'
+        '\t- To exit, enter "e"(exit)')
+
     while True:  # program cycle
-        print('Если Вы хотите добавить контакт, введите: "+"')
+        print('\nWhat do you want to do')
         line = input('--> ')  # interaction string
 
-        if line[0] == '+':
+        if line[0] == '+':  # adding a new contact
             user.add()
 
-        elif line[0] == 'e':
-            break
-
-        elif line[0] == 'w':
+        elif line[0] == 'w' or line[0] == 'W' or line[0] == 'ц' or line[0] == 'Ц':  # view the entire contact book
             print(user)
 
-        elif line[0] == '-':
+        elif line[0] == '-':  # deleting a contact
             user.remove(line[1:])
 
-        elif line[0:2] == 's-':
+        elif line[0:2] == 's-' or line[0:2] == 'S-':  # search for contact
             user.search(line)
+
+        elif line[0] == 'e' or line[0] == 'E' or line[0] == 'у' or line[0] == 'У':  # exiting the program
+            print(user.separator_)  # separate
+            print('Good luck!')
+            print(user.separator_)  # separate
+            break
+
+        else:
+            print('The command entered is not correct.\nLook at the instructions and try again.')

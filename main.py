@@ -3,13 +3,18 @@ import datetime  # getting the current time for greeting
 
 
 class AddressBook:
+
+    """The class combines all the functions of the address book, presented in the form of functions"""
+
     def __init__(self):
         with open('addressbook', 'rb') as file:  # loading saved contacts
             self.address_book = pickle.load(file)
+        self.separator = '==' * 70
+        self.separator_ = '--' * 70
 
     def saving(self, name_file):
 
-        """The function is used to save changes"""
+        """The function overwrites the file and saves all changes"""
 
         with open(name_file, 'wb') as file:
             pickle.dump(self.address_book, file)
@@ -17,7 +22,7 @@ class AddressBook:
     @staticmethod
     def phone_number_conversion(number):
 
-        """The function converts the phone number into a more readable one"""
+        """The function converts the phone number into a more readable one (XXXXXXXXXXX --> X XXX XXX-XX-XX)"""
 
         phone_number = ''  # for later saving a phone number consisting only of digits
 
@@ -28,7 +33,7 @@ class AddressBook:
             except ValueError:
                 continue
 
-        if number[:2] != 's-' or number[:2] != 'S-':  # called only if a contact is added
+        if number[:2] != 's-' and number[:2] != 'S-':  # called only if a contact is added
             while 0 <= len(number) < 11:  # Be sure to enter the phone number
                 number = input('You haven\'t entered phone number, try again --> ')
 
@@ -53,7 +58,7 @@ class AddressBook:
 
         """The function adds new contacts to the address book, saving them in a convenient form for further use"""
 
-        print('==' * 70)  # separate
+        print(self.separator)  # separate
         print('Adding a new contact:')
         name = input('Name --> ')
         last_name = input('Last name (if there is a name) --> ')
@@ -75,9 +80,9 @@ class AddressBook:
 
         self.saving('addressbook')  # Saving a new contact
 
-        print('--' * 70)  # separate
+        print(self.separator_)  # separate
         print('Contact successfully added.')
-        print('==' * 70)  # separate
+        print(self.separator)  # separate
 
     def remove(self, information):
 
@@ -110,11 +115,11 @@ class AddressBook:
 
     def search(self, information):
 
-        """The function searches for a contact by name or by phone number"""
+        """The function searches for a contact by name or phone number and displays all the contacts found"""
 
         contacts = []
         # search by phone number
-        if information[2].isdigit() or information[3].isdigit():
+        if information[2].isdigit() or information[2] == '+':
             # the type of the number changes to loaded in the dictionary
             phone_number = self.phone_number_conversion(information)
             keys = sorted(self.address_book)  # sort the first letters alphabetically
@@ -131,27 +136,29 @@ class AddressBook:
 
         # output the number of found contacts
         if len(contacts) == 0:
-            print('\nThe search yielded no results')
+            print(self.separator_)  # separated
+            print('The search yielded no results')
+            print(self.separator_)  # separated
             return
         print(f'\n{len(contacts)} of contacts were found' if len(contacts) > 1 else
               f'\n{len(contacts)} contact was found')
         number = 1  # counters
         # output all found contacts
+        print(self.separator)  # separated
         for name in contacts:
             details = self.address_book[name[0].upper()][name]  # contact details
-            print('==' * 70)  # separated
             print(f'{number})', end=' ')
             print(f'{name} (phone: {details["phone_number"]}', end='')
             print(', email: ' + details["email"] + ")" if details["email"] != "No data available" else ')')
-            print('==' * 70)  # separated
             number += 1
+        print(self.separator)  # separated
 
     def __str__(self):
 
         """Displays the entire contact list in order"""
 
         keys = sorted(self.address_book)  # sort the first letters alphabetically
-        print('==' * 70)  # separated
+        print(self.separator)  # separate
         for key in keys:
             print(' ' * 2 + key)  # output the first letters
             number = 1  # counter
@@ -161,7 +168,7 @@ class AddressBook:
                 print(f'{name} (phone: {details["phone_number"]}', end='')
                 print(', email: ' + details["email"] + ")" if details["email"] != "No data available" else ')')
                 number += 1
-        return '==' * 70  # separated
+        return '==' * 70  # separate
 
 
 if __name__ == '__main__':
@@ -188,7 +195,7 @@ if __name__ == '__main__':
         '\t- To exit, enter "e"(exit)')
 
     while True:  # program cycle
-        print('What do you want to do')
+        print('\nWhat do you want to do')
         line = input('--> ')  # interaction string
 
         if line[0] == '+':  # adding a new contact
@@ -204,7 +211,10 @@ if __name__ == '__main__':
             user.search(line)
 
         elif line[0] == 'e' or line[0] == 'E' or line[0] == 'у' or line[0] == 'У':  # exiting the program
-            print('--' * 70)  # separate
+            print(user.separator_)  # separate
             print('Good luck!')
-            print('--' * 70)  # separate
+            print(user.separator_)  # separate
             break
+
+        else:
+            print('The command entered is not correct.\nLook at the instructions and try again.')

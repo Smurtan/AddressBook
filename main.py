@@ -11,6 +11,16 @@ class AddressBook:
             self.address_book = pickle.load(file)
         self.separator = '==' * 70
         self.separator_ = '--' * 70
+        # instructions for using the program
+        self.instruction = (
+            '\u001b[33mInstruction manual:\n'
+            '\t- To add a contact, enter "\u001b[31m+\u001b[33m" and fill in the appropriate fields.\n'
+            '\t- To view the entire contact list, enter "\u001b[31mw\u001b[33m" (watch)\n'
+            '\t- To find the contact you need, enter "\u001b[31ms-[contact name/phone number]" (search-...)\u001b[33m\n'
+            '\t- To delete a contact, enter '
+            '"\u001b[31m-[Contact name/first letter of the name and serial number]\u001b[33m"\n'
+            '\t- To exit, enter "\u001b[31me\u001b[33m"(exit)\n'
+            '\t- If you want to look at the instructions again, enter "\u001b[31mI\u001b[33m" (Instruction)')
 
     def saving(self, name_file):
 
@@ -98,6 +108,9 @@ class AddressBook:
                     self.address_book[information[0].upper()].pop(name)
                     self.saving('addressbook')  # Saving changes
                     print('\nContact successfully deleted')
+                    # delete the letter if no more contacts start on it
+                    if len(self.address_book[information[0].upper()]) == 0:
+                        del self.address_book[information[0].upper()]
                     break
                 number += 1
 
@@ -111,6 +124,9 @@ class AddressBook:
                     self.address_book[information[0].upper()].pop(key)
                     self.saving('addressbook')  # Saving changes
                     print('Contact successfully deleted')
+                    # delete the letter if no more contacts start on it
+                    if len(self.address_book[information[0].upper()]) == 0:
+                        del self.address_book[information[0].upper()]
                     break
 
     def search(self, information):
@@ -130,9 +146,12 @@ class AddressBook:
         else:  # search by name
             # we find all matching contacts
             information = information[2:]
-            for key in self.address_book[information[0].upper()].keys():
-                if key.startswith(information):
-                    contacts.append(key)
+            try:
+                for key in self.address_book[information[0].upper()].keys():
+                    if key.startswith(information):
+                        contacts.append(key)
+            except KeyError:
+                pass
 
         # output the number of found contacts
         if len(contacts) == 0:
@@ -177,26 +196,20 @@ if __name__ == '__main__':
     now = datetime.datetime.now().hour  # time at the moment
     # the output of the greeting depends on the time of day
     if 5 <= now < 12:
-        print('Good morning!')
+        print('\u001b[32mGood morning!')
     elif 12 <= now < 17:
-        print('Good afternoon')
+        print('\u001b[32mGood afternoon')
     elif 17 <= now < 22:
-        print('Good evening')
+        print('\u001b[32mGood evening')
     elif 22 <= now < 5:
-        print('Good night')
+        print('\u001b[32mGood night')
 
     # instructions for using the program
-    print(
-        'Instruction manual:\n'
-        '\t- To add a contact, enter "+" and fill in the appropriate fields.\n'
-        '\t- To view the entire contact list, enter "w" (watch)\n'
-        '\t- To find the contact you need, enter "s-[contact name/phone number]" (search-...)\n'
-        '\t- To delete a contact, enter "-[Contact name/first letter of the name and serial number]"\n'
-        '\t- To exit, enter "e"(exit)')
+    print(user.instruction)
 
     while True:  # program cycle
-        print('\nWhat do you want to do')
-        line = input('--> ')  # interaction string
+        print('\n\u001b[31mWhat do you want to do')
+        line = input('--> \u001b[0m')  # interaction string
 
         if line[0] == '+':  # adding a new contact
             user.add()
@@ -210,11 +223,14 @@ if __name__ == '__main__':
         elif line[0:2] == 's-' or line[0:2] == 'S-':  # search for contact
             user.search(line)
 
+        elif line[0] == 'i' or line[0] == 'I':  # outputs the instruction
+            print(user.instruction)
+
         elif line[0] == 'e' or line[0] == 'E' or line[0] == 'у' or line[0] == 'У':  # exiting the program
             print(user.separator_)  # separate
-            print('Good luck!')
+            print('\u001b[32;1mGood luck!\u001b[0m')
             print(user.separator_)  # separate
             break
 
         else:
-            print('The command entered is not correct.\nLook at the instructions and try again.')
+            print('\u001b[31mThe command entered is not correct.\nLook at the instructions and try again.\u001b[0m')
